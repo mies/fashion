@@ -22,6 +22,10 @@ app.get("/", (c) => {
   return c.text("Honc from above! ☁️🪿");
 });
 
+app.get("/openapi.json", (c) => {
+  return c.json(apiSpec);
+});
+
 app.use(
   "/fp/*",
   createMiddleware({
