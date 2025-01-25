@@ -61,7 +61,7 @@ app.get("/api/fashion-items", async (c) => {
   const season = c.req.query("season");
   const category = c.req.query("category");
 
-  let conditions = [];
+  const conditions = [];
   if (season) {
     conditions.push(eq(schema.fashionItems.season, season));
   }
@@ -83,7 +83,7 @@ app.get("/api/fashion-items", async (c) => {
 
 app.get("/api/fashion-items/:id", async (c) => {
   const db = drizzle(c.env.DB);
-  const id = parseInt(c.req.param("id"));
+  const id = Number.parseInt(c.req.param("id"));
 
   const [item] = await db
     .select()
@@ -140,7 +140,7 @@ app.post("/api/fashion-items", async (c) => {
 
 app.put("/api/fashion-items/:id", async (c) => {
   const db = drizzle(c.env.DB);
-  const id = parseInt(c.req.param("id"));
+  const id = Number.parseInt(c.req.param("id"));
   const body = await c.req.json();
 
   const [updatedItem] = await db
@@ -167,7 +167,7 @@ app.put("/api/fashion-items/:id", async (c) => {
 
 app.delete("/api/fashion-items/:id", async (c) => {
   const db = drizzle(c.env.DB);
-  const id = parseInt(c.req.param("id"));
+  const id = Number.parseInt(c.req.param("id"));
 
   const [deletedItem] = await db
     .delete(schema.fashionItems)
