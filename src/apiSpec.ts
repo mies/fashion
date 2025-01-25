@@ -5,6 +5,12 @@ export const apiSpec = {
     description: "API for managing a seasonal fashion catalog",
     version: "1.0.0"
   },
+  servers: [
+    {
+      url: "http://localhost:8787",
+      description: "Local server"
+    }
+  ],
   paths: {
     "/api/fashion-items": {
       get: {
