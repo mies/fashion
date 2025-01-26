@@ -111,6 +111,7 @@ app.post("/api/fashion-items", async (c) => {
     const anthropic = new Anthropic({
       apiKey: c.env.ANTHROPIC_API_KEY,
       baseURL: `https://gateway.ai.cloudflare.com/v1/${c.env.CLOUDFLARE_ACCOUNT_ID}/${c.env.CLOUDFLARE_GATEWAY_ID}/anthropic`,
+      fetch: globalThis.fetch,
     });
 
     // Generate fashion item details using Claude
