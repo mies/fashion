@@ -9,6 +9,7 @@ import { createMiddleware } from "@fiberplane/embedded";
 import apiSpec from "./apiSpec";
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "hono/adapter";
+import { GeneratedFashionItem, validateGeneratedItem } from "./types";
 
 type Bindings = {
   DB: D1Database;
@@ -100,45 +101,86 @@ app.get("/api/fashion-items/:id", async (c) => {
   return c.json(item);
 });
 
+
 app.post("/api/fashion-items", async (c) => {
-  const db = drizzle(c.env.DB);
-  const { category, season } = await c.req.json();
+  try {
+    const db = drizzle(c.env.DB);
+    const { category, season } = await c.req.json();
 
-  // Initialize Anthropic client with Cloudflare AI Gateway
-  const anthropic = new Anthropic({
-    apiKey: c.env.ANTHROPIC_API_KEY,
-    baseURL: `https://gateway.ai.cloudflare.com/v1/${c.env.CLOUDFLARE_ACCOUNT_ID}/${c.env.CLOUDFLARE_GATEWAY_ID}/anthropic`,
-  });
+    // Initialize Anthropic client with Cloudflare AI Gateway
+    const anthropic = new Anthropic({
+      apiKey: c.env.ANTHROPIC_API_KEY,
+      baseURL: `https://gateway.ai.cloudflare.com/v1/${c.env.CLOUDFLARE_ACCOUNT_ID}/${c.env.CLOUDFLARE_GATEWAY_ID}/anthropic`,
+    });
 
-  // Generate fashion item details using Claude
-  const prompt = `Generate a creative fashion item for the ${category} category in the ${season} season.
-  Include a name, detailed description, and suggested price in cents (between 2000 and 50000).
-  Format the response as a JSON object with these exact keys: name, description, price.`;
+    // Generate fashion item details using Claude
+    const prompt = `Generate a creative fashion item for the ${category} category in the ${season} season.
+    Include a name, detailed description, and suggested price in cents (between 2000 and 50000).
+    Format the response as a JSON object with these exact keys: name, description, price.`;
 
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 1024,
-  });
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20240620",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1024,
+      temperature: 0.1,
+      tool_choice: { type: "tool", name: "generate_fashion_item" },
+      tools: [
+        {
+          name: "generate_fashion_item",
+          description: "Generate a creative fashion item for the given category and season.",
+          input_schema: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "The name of the fashion item",
+              },
+              description: {
+                type: "string", 
+                description: "Detailed description of the fashion item",
+              },
+              price: {
+                type: "number",
+                description: "Price in cents between 2000 and 50000",
+                minimum: 2000,
+                maximum: 50000
+              },
+            },
+            required: ["name", "description", "price"],
+          },
+        },
+      ],
+    });
 
-  const generatedItem = JSON.parse(
-    response.content[0].type === "text" ? response.content[0].text : "{}",
-  );
+    let generatedItem: GeneratedFashionItem;
+    if (response.content[0].type === "tool_use") {
+      const rawInput = response.content[0].input;
+      if (!validateGeneratedItem(rawInput)) {
+        console.error("Invalid generated item format", rawInput);
+        return c.json({ error: "Invalid response upstream" }, 500);
+      }
+      generatedItem = rawInput;
+    } else {
+      console.error("No tool use found in response", response);
+      return c.json({ error: "Invalid response upstream" }, 500);
+    }
 
-  // Insert the generated item into the database
-  const [newItem] = await db
-    .insert(schema.fashionItems)
-    .values({
-      name: generatedItem.name,
-      description: generatedItem.description,
-      season: season,
-      category: category,
-      price: generatedItem.price,
-      inStock: true,
-    })
-    .returning();
+    const [newItem] = await db
+      .insert(schema.fashionItems)
+      .values({
+        name: generatedItem.name,
+        description: generatedItem.description,
+        season: season,
+        category: category,
+        price: generatedItem.price,
+        inStock: true,
+      })
+      .returning();
 
-  return c.json(newItem, 201);
+    return c.json(newItem, 201);
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : "Internal server error" }, 500);
+  }
 });
 
 app.put("/api/fashion-items/:id", async (c) => {
