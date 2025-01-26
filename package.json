@@ -10,11 +10,11 @@
     "db:seed": "tsx seed.ts",
     "db:setup": "npm run db:touch && npm run db:generate && npm run db:migrate && npm run db:seed",
     "db:studio": "drizzle-kit studio",
-    "fiberplane": "npx @fiberplane/studio@latest"
+    "fiberplane": "npx @fiberplane/studio@canary"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "@fiberplane/embedded": "^0.0.24",
+    "@fiberplane/embedded": "^0.0.26",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "hono": "^4.6.7"
