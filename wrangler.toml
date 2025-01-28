@@ -5,7 +5,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [[d1_databases]]
 binding = "DB"
 database_name = "fashion"
-database_id = "local-fashion"
+database_id = "3d029485-d2b7-4ac4-a70b-a7522a9abf05"
 migrations_dir = "drizzle/migrations"
 
 # [vars]
