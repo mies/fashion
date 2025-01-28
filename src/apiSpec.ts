@@ -196,6 +196,203 @@ export const apiSpec = {
           }
         }
       }
+    },
+    "/api/fashion-items/price-range": {
+      get: {
+        summary: "Get fashion items within a price range",
+        parameters: [
+          {
+            name: "min",
+            in: "query",
+            description: "Minimum price in cents",
+            required: false,
+            schema: {
+              type: "integer",
+              minimum: 0,
+              default: 0
+            }
+          },
+          {
+            name: "max",
+            in: "query",
+            description: "Maximum price in cents",
+            required: false,
+            schema: {
+              type: "integer",
+              minimum: 0
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "List of fashion items within price range",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    items: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/FashionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fashion-items/trending": {
+      get: {
+        summary: "Get trending fashion items",
+        parameters: [
+          {
+            name: "limit",
+            in: "query",
+            description: "Maximum number of items to return",
+            required: false,
+            schema: {
+              type: "integer",
+              minimum: 1,
+              default: 10
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "List of trending fashion items",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    items: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/FashionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fashion-items/by-categories": {
+      get: {
+        summary: "Get fashion items by multiple categories",
+        parameters: [
+          {
+            name: "categories",
+            in: "query",
+            description: "Comma-separated list of categories",
+            required: true,
+            schema: {
+              type: "string"
+            },
+            example: "Dresses,Tops,Accessories"
+          }
+        ],
+        responses: {
+          "200": {
+            description: "List of fashion items in specified categories",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    items: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/FashionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            description: "No categories provided",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fashion-items/{id}/stock-status": {
+      patch: {
+        summary: "Update stock status of a fashion item",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "integer"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["inStock"],
+                properties: {
+                  inStock: {
+                    type: "boolean",
+                    description: "New stock status"
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Stock status updated",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/FashionItem"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Invalid request body",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "Fashion item not found",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
