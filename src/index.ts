@@ -33,7 +33,7 @@ app.get("/openapi.json", (c) => {
 app.use(
   "/fp/*",
   createMiddleware({
-    openapi: { content: JSON.stringify(apiSpec) },
+    openapi: { url: "/openapi.json" },
     apiKey: "",
   }),
 );

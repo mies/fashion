@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "@fiberplane/embedded": "^0.0.27",
+    "@fiberplane/embedded": "0.0.28-alpha.3",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "hono": "^4.6.7"
