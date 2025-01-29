@@ -393,6 +393,89 @@ export const apiSpec = {
           }
         }
       }
+    },
+    "/api/fashion-items/bulk-price-update": {
+      post: {
+        summary: "Attempt to update prices for items in a category",
+        description: "This endpoint demonstrates error handling and may fail with a 500 error",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["category", "percentageIncrease"],
+                properties: {
+                  category: {
+                    type: "string",
+                    description: "Category of items to update",
+                    example: "Dresses"
+                  },
+                  percentageIncrease: {
+                    type: "number",
+                    description: "Percentage to increase prices by",
+                    example: 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Prices updated successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    items: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/FashionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Invalid input parameters",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "string",
+                      example: "Failed to update prices"
+                    },
+                    details: {
+                      type: "string",
+                      example: "Error message from the database"
+                    },
+                    technicalDetails: {
+                      type: "string",
+                      example: "Attempted to perform an invalid SQL operation"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {

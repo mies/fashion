@@ -301,4 +301,38 @@ app.patch("/api/fashion-items/:id/stock-status", async (c) => {
   return c.json(updatedItem);
 });
 
+app.post("/api/fashion-items/bulk-price-update", async (c) => {
+  const db = drizzle(c.env.DB);
+  const { category, percentageIncrease } = await c.req.json();
+
+  if (!category || typeof percentageIncrease !== "number") {
+    return c.json({ error: "Invalid input parameters" }, 400);
+  }
+
+  try {
+    // Intentionally faulty SQL that will cause an error
+    // Using incorrect syntax for demonstration
+    const items = await db
+      .select()
+      .from(schema.fashionItems)
+      .where(sql`${schema.fashionItems.category} = ${category}`)
+      .set({ // This is incorrect - mixing select with set
+        price: sql`${schema.fashionItems.price} * (1 + ${percentageIncrease / 100})`
+      })
+      .all();
+
+    return c.json({ items });
+  } catch (error) {
+    console.error("Database error:", error);
+    return c.json(
+      { 
+        error: "Failed to update prices", 
+        details: error instanceof Error ? error.message : "Unknown error",
+        technicalDetails: "Attempted to perform an invalid SQL operation"
+      }, 
+      500
+    );
+  }
+});
+
 export default instrument(app);
