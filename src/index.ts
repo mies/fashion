@@ -9,6 +9,7 @@ import { createMiddleware } from "@fiberplane/embedded";
 import apiSpec from "./apiSpec";
 import Anthropic from "@anthropic-ai/sdk";
 import { type GeneratedFashionItem, validateGeneratedItem } from "./types";
+import { serveEmojiFavicon } from "./middleware";
 
 type Bindings = {
   DB: D1Database;
@@ -21,7 +22,13 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", cors());
 
+app.use("*", serveEmojiFavicon("👗"));
+
 app.get("/", async (c) => {
+  return c.text("*Fashionable HONC* ☁️🪿👗");
+});
+
+app.get("/favicon.ico", async (c) => {
   return c.text("Honc from above! ☁️🪿");
 });
 
