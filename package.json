@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "@fiberplane/embedded": "^0.0.26",
+    "@fiberplane/embedded": "0.0.28",
+    "@fiberplane/hono-otel": "0.6.2",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "hono": "^4.6.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241205.0",
-    "@fiberplane/hono-otel": "^0.6.2",
     "@libsql/client": "^0.14.0",
     "drizzle-kit": "^0.28.1",
     "drizzle-seed": "^0.1.2",

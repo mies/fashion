@@ -8,8 +8,8 @@ import * as schema from "./db/schema";
 import { createMiddleware } from "@fiberplane/embedded";
 import apiSpec from "./apiSpec";
 import Anthropic from "@anthropic-ai/sdk";
-import { env } from "hono/adapter";
-import { GeneratedFashionItem, validateGeneratedItem } from "./types";
+import { type GeneratedFashionItem, validateGeneratedItem } from "./types";
+import { serveEmojiFavicon } from "./middleware";
 
 type Bindings = {
   DB: D1Database;
@@ -22,8 +22,10 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", cors());
 
-app.get("/", (c) => {
-  return c.text("Honc from above! ☁️🪿");
+app.use("*", serveEmojiFavicon("👗"));
+
+app.get("/", async (c) => {
+  return c.text("*Fashionable HONC* ☁️🪿👗");
 });
 
 app.get("/openapi.json", (c) => {
@@ -33,7 +35,7 @@ app.get("/openapi.json", (c) => {
 app.use(
   "/fp/*",
   createMiddleware({
-    openapi: { content: JSON.stringify(apiSpec) },
+    openapi: { url: "/openapi.json" },
     apiKey: "",
   }),
 );
