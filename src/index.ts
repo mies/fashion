@@ -28,10 +28,6 @@ app.get("/", async (c) => {
   return c.text("*Fashionable HONC* ☁️🪿👗");
 });
 
-app.get("/favicon.ico", async (c) => {
-  return c.text("Honc from above! ☁️🪿");
-});
-
 app.get("/openapi.json", (c) => {
   return c.json(apiSpec);
 });
