@@ -12,8 +12,8 @@ importers:
         specifier: ^0.33.1
         version: 0.33.1
       '@fiberplane/embedded':
-        specifier: 0.0.29-alpha.3
-        version: 0.0.29-alpha.3(hono@4.6.17)
+        specifier: 0.0.29-alpha.4
+        version: 0.0.29-alpha.4(hono@4.6.17)
       '@fiberplane/hono-otel':
         specifier: 0.6.2
         version: 0.6.2
@@ -666,8 +666,8 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@fiberplane/embedded@0.0.29-alpha.3':
-    resolution: {integrity: sha512-gfBaYBJ7U6foAjCjPNXUzlxVeH3OhoFNmmbahufD01ld1HBAiSehwI3Rp/tkAB+V4x1m4g3Yp54riKLfTc46wg==}
+  '@fiberplane/embedded@0.0.29-alpha.4':
+    resolution: {integrity: sha512-rVGD5xblV0BONcCtUKptxMd3Kw94+LIDQChpk/YyVK2VXl0fxzbpoxnDCQWVQDFTG38GwmfdaZ9bzdsF5z7VtA==}
     peerDependencies:
       hono: ^4.0
 
@@ -1670,7 +1670,7 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@fiberplane/embedded@0.0.29-alpha.3(hono@4.6.17)':
+  '@fiberplane/embedded@0.0.29-alpha.4(hono@4.6.17)':
     dependencies:
       hono: 4.6.17
       openapi-types: 12.1.3
