@@ -28,8 +28,30 @@ app.get("/", async (c) => {
   return c.text("*Fashionable HONC* ☁️🪿👗");
 });
 
+function hasServers(spec: unknown): spec is { servers: unknown[] } {
+  return !!spec && typeof spec === "object" && "servers" in spec && Array.isArray(spec.servers) && spec.servers.length > 0;
+}
+
 app.get("/openapi.json", (c) => {
-  return c.json(apiSpec);
+  const origin = new URL(c.req.url).origin;
+
+  // HACK - Allows us to force a server of "localhost:8787" even when the playground SPA is running in dev mode on :6660
+  const spec = {
+    ...apiSpec,
+    servers: hasServers(apiSpec) ? apiSpec.servers : []
+  };
+
+  if (origin?.includes('localhost')) {
+    spec.servers = [
+      {
+        url: 'http://localhost:8787',
+        description: 'Local development server'
+      },
+      ...(spec.servers || []),
+    ];
+  }
+
+  return c.json(spec);
 });
 
 app.use(
@@ -78,10 +100,10 @@ app.get("/api/fashion-items", async (c) => {
   const items =
     conditions.length > 0
       ? await db
-          .select()
-          .from(schema.fashionItems)
-          .where(sql`${conditions.join(" AND ")}`)
-          .all()
+        .select()
+        .from(schema.fashionItems)
+        .where(sql`${conditions.join(" AND ")}`)
+        .all()
       : await db.select().from(schema.fashionItems).all();
 
   return c.json({ items });
@@ -138,7 +160,7 @@ app.post("/api/fashion-items", async (c) => {
                 description: "The name of the fashion item",
               },
               description: {
-                type: "string", 
+                type: "string",
                 description: "Detailed description of the fashion item",
               },
               price: {
@@ -262,7 +284,7 @@ app.get("/api/fashion-items/trending", async (c) => {
 app.get("/api/fashion-items/by-categories", async (c) => {
   const db = drizzle(c.env.DB);
   const categories = c.req.query("categories")?.split(",") || [];
-  
+
   if (categories.length === 0) {
     return c.json({ error: "No categories provided" }, 400);
   }
