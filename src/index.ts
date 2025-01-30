@@ -347,11 +347,11 @@ app.post("/api/fashion-items/bulk-price-update", async (c) => {
   } catch (error) {
     console.error("Database error:", error);
     return c.json(
-      { 
-        error: "Failed to update prices", 
+      {
+        error: "Failed to update prices",
         details: error instanceof Error ? error.message : "Unknown error",
         technicalDetails: "Attempted to perform an invalid SQL operation"
-      }, 
+      },
       500
     );
   }
