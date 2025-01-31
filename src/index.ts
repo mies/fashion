@@ -2,7 +2,7 @@ import { instrument } from "@fiberplane/hono-otel";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import * as schema from "./db/schema";
 
 import { createMiddleware } from "@fiberplane/embedded";
@@ -102,7 +102,9 @@ app.get("/api/fashion-items", async (c) => {
       ? await db
         .select()
         .from(schema.fashionItems)
-        .where(sql`${conditions.join(" AND ")}`)
+        .where(
+          and(...conditions)
+        )
         .all()
       : await db.select().from(schema.fashionItems).all();
 
