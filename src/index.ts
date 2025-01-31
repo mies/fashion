@@ -2,7 +2,7 @@ import { instrument } from "@fiberplane/hono-otel";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import * as schema from "./db/schema";
 
 import { createMiddleware } from "@fiberplane/embedded";
@@ -28,8 +28,30 @@ app.get("/", async (c) => {
   return c.text("*Fashionable HONC* ☁️🪿👗");
 });
 
+function hasServers(spec: unknown): spec is { servers: unknown[] } {
+  return !!spec && typeof spec === "object" && "servers" in spec && Array.isArray(spec.servers) && spec.servers.length > 0;
+}
+
 app.get("/openapi.json", (c) => {
-  return c.json(apiSpec);
+  const origin = new URL(c.req.url).origin;
+
+  // HACK - Allows us to force a server of "localhost:8787" even when the playground SPA is running in dev mode on :6660
+  const spec = {
+    ...apiSpec,
+    servers: hasServers(apiSpec) ? apiSpec.servers : []
+  };
+
+  if (origin?.includes('localhost')) {
+    spec.servers = [
+      {
+        url: 'http://localhost:8787',
+        description: 'Local development server'
+      },
+      ...(spec.servers || []),
+    ];
+  }
+
+  return c.json(spec);
 });
 
 app.use(
@@ -78,11 +100,62 @@ app.get("/api/fashion-items", async (c) => {
   const items =
     conditions.length > 0
       ? await db
-          .select()
-          .from(schema.fashionItems)
-          .where(sql`${conditions.join(" AND ")}`)
-          .all()
+        .select()
+        .from(schema.fashionItems)
+        .where(
+          and(...conditions)
+        )
+        .all()
       : await db.select().from(schema.fashionItems).all();
+
+  return c.json({ items });
+});
+
+
+app.get("/api/fashion-items/price-range", async (c) => {
+  const db = drizzle(c.env.DB);
+  const minPrice = Number(c.req.query("min")) || 0;
+  const maxPrice = Number(c.req.query("max")) || Number.MAX_SAFE_INTEGER;
+
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`)
+    .all();
+
+  return c.json({ items });
+});
+
+app.get("/api/fashion-items/trending", async (c) => {
+  const db = drizzle(c.env.DB);
+  const limit = Number(c.req.query("limit")) || 10;
+
+  // For now, we'll just return the most recently added in-stock items
+  // In a real app, you might want to track views/purchases
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(eq(schema.fashionItems.inStock, true))
+    .orderBy(sql`${schema.fashionItems.createdAt} DESC`)
+    .limit(limit)
+    .all();
+
+  return c.json({ items });
+});
+
+app.get("/api/fashion-items/by-categories", async (c) => {
+  const db = drizzle(c.env.DB);
+  const categories = c.req.query("categories")?.split(",") || [];
+
+  if (categories.length === 0) {
+    return c.json({ error: "No categories provided" }, 400);
+  }
+
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(sql`${schema.fashionItems.category} IN ${categories}`)
+    .all();
 
   return c.json({ items });
 });
@@ -138,7 +211,7 @@ app.post("/api/fashion-items", async (c) => {
                 description: "The name of the fashion item",
               },
               description: {
-                type: "string", 
+                type: "string",
                 description: "Detailed description of the fashion item",
               },
               price: {
@@ -228,53 +301,6 @@ app.delete("/api/fashion-items/:id", async (c) => {
   return c.json({ message: "Item deleted successfully" });
 });
 
-app.get("/api/fashion-items/price-range", async (c) => {
-  const db = drizzle(c.env.DB);
-  const minPrice = Number(c.req.query("min")) || 0;
-  const maxPrice = Number(c.req.query("max")) || Number.MAX_SAFE_INTEGER;
-
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`)
-    .all();
-
-  return c.json({ items });
-});
-
-app.get("/api/fashion-items/trending", async (c) => {
-  const db = drizzle(c.env.DB);
-  const limit = Number(c.req.query("limit")) || 10;
-
-  // For now, we'll just return the most recently added in-stock items
-  // In a real app, you might want to track views/purchases
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(eq(schema.fashionItems.inStock, true))
-    .orderBy(sql`${schema.fashionItems.createdAt} DESC`)
-    .limit(limit)
-    .all();
-
-  return c.json({ items });
-});
-
-app.get("/api/fashion-items/by-categories", async (c) => {
-  const db = drizzle(c.env.DB);
-  const categories = c.req.query("categories")?.split(",") || [];
-  
-  if (categories.length === 0) {
-    return c.json({ error: "No categories provided" }, 400);
-  }
-
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(sql`${schema.fashionItems.category} IN ${categories}`)
-    .all();
-
-  return c.json({ items });
-});
 
 app.patch("/api/fashion-items/:id/stock-status", async (c) => {
   const db = drizzle(c.env.DB);
@@ -299,6 +325,40 @@ app.patch("/api/fashion-items/:id/stock-status", async (c) => {
   }
 
   return c.json(updatedItem);
+});
+
+app.post("/api/fashion-items/bulk-price-update", async (c) => {
+  const db = drizzle(c.env.DB);
+  const { category, percentageIncrease } = await c.req.json();
+
+  if (!category || typeof percentageIncrease !== "number") {
+    return c.json({ error: "Invalid input parameters" }, 400);
+  }
+
+  try {
+    // Intentionally faulty SQL that will cause an error
+    // Using incorrect syntax for demonstration
+    const items = await db
+      .select()
+      .from(schema.fashionItems)
+      .where(sql`${schema.fashionItems.category} = ${category}`)
+      .set({ // This is incorrect - mixing select with set
+        price: sql`${schema.fashionItems.price} * (1 + ${percentageIncrease / 100})`
+      })
+      .all();
+
+    return c.json({ items });
+  } catch (error) {
+    console.error("Database error:", error);
+    return c.json(
+      {
+        error: "Failed to update prices",
+        details: error instanceof Error ? error.message : "Unknown error",
+        technicalDetails: "Attempted to perform an invalid SQL operation"
+      },
+      500
+    );
+  }
 });
 
 export default instrument(app);
