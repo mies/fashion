@@ -111,6 +111,55 @@ app.get("/api/fashion-items", async (c) => {
   return c.json({ items });
 });
 
+
+app.get("/api/fashion-items/price-range", async (c) => {
+  const db = drizzle(c.env.DB);
+  const minPrice = Number(c.req.query("min")) || 0;
+  const maxPrice = Number(c.req.query("max")) || Number.MAX_SAFE_INTEGER;
+
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`)
+    .all();
+
+  return c.json({ items });
+});
+
+app.get("/api/fashion-items/trending", async (c) => {
+  const db = drizzle(c.env.DB);
+  const limit = Number(c.req.query("limit")) || 10;
+
+  // For now, we'll just return the most recently added in-stock items
+  // In a real app, you might want to track views/purchases
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(eq(schema.fashionItems.inStock, true))
+    .orderBy(sql`${schema.fashionItems.createdAt} DESC`)
+    .limit(limit)
+    .all();
+
+  return c.json({ items });
+});
+
+app.get("/api/fashion-items/by-categories", async (c) => {
+  const db = drizzle(c.env.DB);
+  const categories = c.req.query("categories")?.split(",") || [];
+
+  if (categories.length === 0) {
+    return c.json({ error: "No categories provided" }, 400);
+  }
+
+  const items = await db
+    .select()
+    .from(schema.fashionItems)
+    .where(sql`${schema.fashionItems.category} IN ${categories}`)
+    .all();
+
+  return c.json({ items });
+});
+
 app.get("/api/fashion-items/:id", async (c) => {
   const db = drizzle(c.env.DB);
   const id = Number.parseInt(c.req.param("id"));
@@ -252,53 +301,6 @@ app.delete("/api/fashion-items/:id", async (c) => {
   return c.json({ message: "Item deleted successfully" });
 });
 
-app.get("/api/fashion-items/price-range", async (c) => {
-  const db = drizzle(c.env.DB);
-  const minPrice = Number(c.req.query("min")) || 0;
-  const maxPrice = Number(c.req.query("max")) || Number.MAX_SAFE_INTEGER;
-
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`)
-    .all();
-
-  return c.json({ items });
-});
-
-app.get("/api/fashion-items/trending", async (c) => {
-  const db = drizzle(c.env.DB);
-  const limit = Number(c.req.query("limit")) || 10;
-
-  // For now, we'll just return the most recently added in-stock items
-  // In a real app, you might want to track views/purchases
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(eq(schema.fashionItems.inStock, true))
-    .orderBy(sql`${schema.fashionItems.createdAt} DESC`)
-    .limit(limit)
-    .all();
-
-  return c.json({ items });
-});
-
-app.get("/api/fashion-items/by-categories", async (c) => {
-  const db = drizzle(c.env.DB);
-  const categories = c.req.query("categories")?.split(",") || [];
-
-  if (categories.length === 0) {
-    return c.json({ error: "No categories provided" }, 400);
-  }
-
-  const items = await db
-    .select()
-    .from(schema.fashionItems)
-    .where(sql`${schema.fashionItems.category} IN ${categories}`)
-    .all();
-
-  return c.json({ items });
-});
 
 app.patch("/api/fashion-items/:id/stock-status", async (c) => {
   const db = drizzle(c.env.DB);
