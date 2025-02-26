@@ -5,7 +5,7 @@ import { cors } from "hono/cors";
 import { eq, sql, and } from "drizzle-orm";
 import * as schema from "./db/schema";
 
-import { createMiddleware } from "@fiberplane/embedded";
+import { createFiberplane } from "@fiberplane/hono";
 import apiSpec from "./apiSpec";
 import Anthropic from "@anthropic-ai/sdk";
 import { type GeneratedFashionItem, validateGeneratedItem } from "./types";
@@ -29,7 +29,13 @@ app.get("/", async (c) => {
 });
 
 function hasServers(spec: unknown): spec is { servers: unknown[] } {
-  return !!spec && typeof spec === "object" && "servers" in spec && Array.isArray(spec.servers) && spec.servers.length > 0;
+  return (
+    !!spec &&
+    typeof spec === "object" &&
+    "servers" in spec &&
+    Array.isArray(spec.servers) &&
+    spec.servers.length > 0
+  );
 }
 
 app.get("/openapi.json", (c) => {
@@ -38,14 +44,14 @@ app.get("/openapi.json", (c) => {
   // HACK - Allows us to force a server of "localhost:8787" even when the playground SPA is running in dev mode on :6660
   const spec = {
     ...apiSpec,
-    servers: hasServers(apiSpec) ? apiSpec.servers : []
+    servers: hasServers(apiSpec) ? apiSpec.servers : [],
   };
 
-  if (origin?.includes('localhost')) {
+  if (origin?.includes("localhost")) {
     spec.servers = [
       {
-        url: 'http://localhost:8787',
-        description: 'Local development server'
+        url: "http://localhost:8787",
+        description: "Local development server",
       },
       ...(spec.servers || []),
     ];
@@ -56,9 +62,10 @@ app.get("/openapi.json", (c) => {
 
 app.use(
   "/fp/*",
-  createMiddleware({
+  createFiberplane({
     openapi: { url: "/openapi.json" },
-    apiKey: "",
+    apiKey: "fp_wD9nLEXNhaVfq-U-iUzwbOfQAWjTBlDF",
+    //fpxEndpoint: "http://localhost:8787/v1/traces",
   }),
 );
 
@@ -100,17 +107,14 @@ app.get("/api/fashion-items", async (c) => {
   const items =
     conditions.length > 0
       ? await db
-        .select()
-        .from(schema.fashionItems)
-        .where(
-          and(...conditions)
-        )
-        .all()
+          .select()
+          .from(schema.fashionItems)
+          .where(and(...conditions))
+          .all()
       : await db.select().from(schema.fashionItems).all();
 
   return c.json({ items });
 });
-
 
 app.get("/api/fashion-items/price-range", async (c) => {
   const db = drizzle(c.env.DB);
@@ -120,7 +124,9 @@ app.get("/api/fashion-items/price-range", async (c) => {
   const items = await db
     .select()
     .from(schema.fashionItems)
-    .where(sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`)
+    .where(
+      sql`${schema.fashionItems.price} >= ${minPrice} AND ${schema.fashionItems.price} <= ${maxPrice}`,
+    )
     .all();
 
   return c.json({ items });
@@ -202,7 +208,8 @@ app.post("/api/fashion-items", async (c) => {
       tools: [
         {
           name: "generate_fashion_item",
-          description: "Generate a creative fashion item for the given category and season.",
+          description:
+            "Generate a creative fashion item for the given category and season.",
           input_schema: {
             type: "object",
             properties: {
@@ -218,7 +225,7 @@ app.post("/api/fashion-items", async (c) => {
                 type: "number",
                 description: "Price in cents between 2000 and 50000",
                 minimum: 2000,
-                maximum: 50000
+                maximum: 50000,
               },
             },
             required: ["name", "description", "price"],
@@ -254,7 +261,12 @@ app.post("/api/fashion-items", async (c) => {
 
     return c.json(newItem, 201);
   } catch (error) {
-    return c.json({ error: error instanceof Error ? error.message : "Internal server error" }, 500);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      500,
+    );
   }
 });
 
@@ -301,7 +313,6 @@ app.delete("/api/fashion-items/:id", async (c) => {
   return c.json({ message: "Item deleted successfully" });
 });
 
-
 app.patch("/api/fashion-items/:id/stock-status", async (c) => {
   const db = drizzle(c.env.DB);
   const id = Number.parseInt(c.req.param("id"));
@@ -342,8 +353,9 @@ app.post("/api/fashion-items/bulk-price-update", async (c) => {
       .select()
       .from(schema.fashionItems)
       .where(sql`${schema.fashionItems.category} = ${category}`)
-      .set({ // This is incorrect - mixing select with set
-        price: sql`${schema.fashionItems.price} * (1 + ${percentageIncrease / 100})`
+      .set({
+        // This is incorrect - mixing select with set
+        price: sql`${schema.fashionItems.price} * (1 + ${percentageIncrease / 100})`,
       })
       .all();
 
@@ -354,9 +366,9 @@ app.post("/api/fashion-items/bulk-price-update", async (c) => {
       {
         error: "Failed to update prices",
         details: error instanceof Error ? error.message : "Unknown error",
-        technicalDetails: "Attempted to perform an invalid SQL operation"
+        technicalDetails: "Attempted to perform an invalid SQL operation",
       },
-      500
+      500,
     );
   }
 });
