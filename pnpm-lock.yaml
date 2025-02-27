@@ -8,18 +8,15 @@ importers:
 
   .:
     dependencies:
-      '-':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@anthropic-ai/sdk':
         specifier: ^0.33.1
         version: 0.33.1
       '@fiberplane/hono':
-        specifier: 0.4.4-beta.1
-        version: 0.4.4-beta.1(@hono/zod-openapi@0.18.4(hono@4.6.17)(zod@3.24.1))(@standard-schema/spec@1.0.0)(hono@4.6.17)
+        specifier: 0.4.4-beta.3
+        version: 0.4.4-beta.3(@hono/zod-openapi@0.18.4(hono@4.6.17)(zod@3.24.1))(@standard-schema/spec@1.0.0)(hono@4.6.17)
       '@fiberplane/hono-otel':
-        specifier: 0.8.0-canary.4
-        version: 0.8.0-canary.4
+        specifier: 0.8.0-canary.5
+        version: 0.8.0-canary.5
       dotenv:
         specifier: ^16.4.5
         version: 16.4.7
@@ -53,9 +50,6 @@ importers:
         version: 3.103.2(@cloudflare/workers-types@4.20250109.0)
 
 packages:
-
-  '-@0.0.1':
-    resolution: {integrity: sha512-3HfneK3DGAm05fpyj20sT3apkNcvPpCuccOThOPdzz8sY7GgQGe0l93XH9bt+YzibcTIgUAIMoyVJI740RtgyQ==}
 
   '@anthropic-ai/sdk@0.33.1':
     resolution: {integrity: sha512-VrlbxiAdVRGuKP2UQlCnsShDHJKWepzvfRCkZMpU+oaUdKLpOfmylLMRojGrAgebV+kDtPjewCVP0laHXg+vsA==}
@@ -680,11 +674,11 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@fiberplane/hono-otel@0.8.0-canary.4':
-    resolution: {integrity: sha512-qJyaMZswmIvK0glmJeyOH+PAEEu7yUuc06d4R3YfRpl5I414TQ/oPW02/AADMqf4ChySyEqVRTO0H0mRlSLCWg==}
+  '@fiberplane/hono-otel@0.8.0-canary.5':
+    resolution: {integrity: sha512-vTI0zTetwmzxrPJRwBg3seBBFl5E58tBtJ8dCAgtLt38DJs8fjjV1Ly9BKkdC4ixvlNzjkVD1xaLiF+TfVAmbg==}
 
-  '@fiberplane/hono@0.4.4-beta.1':
-    resolution: {integrity: sha512-8DAjDGl/whhSqCQuzwCae00neVtwlQwwkjOX4F9kUoVLLOEvWaW2k6z1Gnhj43OSQq3Ck5fBAzzzWKFOl/JfUw==}
+  '@fiberplane/hono@0.4.4-beta.3':
+    resolution: {integrity: sha512-rU3Ayk4K0O36miAudPKoMKOi4rkVW9bcESciKxdKjmjRQDPAIP4it4MCybqKbBue9l7DSK9uF9R1/iXfiTT8mg==}
     peerDependencies:
       '@hono/zod-openapi': ^0.18.0
       hono: ^4.0
@@ -850,6 +844,10 @@ packages:
 
   '@opentelemetry/semantic-conventions@1.28.0':
     resolution: {integrity: sha512-lp4qAiMTD4sNWW4DbKLBkfiMZ4jbAboJIGOQr5DvciMRI494OapieI9qiODpOt0XBr1LjIDy1xAGAnVs5supTA==}
+    engines: {node: '>=14'}
+
+  '@opentelemetry/semantic-conventions@1.30.0':
+    resolution: {integrity: sha512-4VlGgo32k2EQ2wcCY3vEU28A0O13aOtHz3Xt2/2U5FAh9EfhD6t6DqL5Z6yAnRCntbTFDU4YfbpyzSlHNWycPw==}
     engines: {node: '>=14'}
 
   '@opentelemetry/semantic-conventions@1.9.0':
@@ -1350,8 +1348,6 @@ packages:
 
 snapshots:
 
-  '-@0.0.1': {}
-
   '@anthropic-ai/sdk@0.33.1':
     dependencies:
       '@types/node': 18.19.71
@@ -1693,7 +1689,7 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@fiberplane/hono-otel@0.8.0-canary.4':
+  '@fiberplane/hono-otel@0.8.0-canary.5':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.9.0(@opentelemetry/api@1.9.0)
@@ -1702,11 +1698,11 @@ snapshots:
       '@opentelemetry/otlp-transformer': 0.35.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.28.0
+      '@opentelemetry/semantic-conventions': 1.30.0
       '@types/shimmer': 1.2.0
       shimmer: 1.2.1
 
-  '@fiberplane/hono@0.4.4-beta.1(@hono/zod-openapi@0.18.4(hono@4.6.17)(zod@3.24.1))(@standard-schema/spec@1.0.0)(hono@4.6.17)':
+  '@fiberplane/hono@0.4.4-beta.3(@hono/zod-openapi@0.18.4(hono@4.6.17)(zod@3.24.1))(@standard-schema/spec@1.0.0)(hono@4.6.17)':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@hono/standard-validator': 0.1.2(@standard-schema/spec@1.0.0)(hono@4.6.17)
@@ -1879,6 +1875,8 @@ snapshots:
       '@opentelemetry/semantic-conventions': 1.9.0
 
   '@opentelemetry/semantic-conventions@1.28.0': {}
+
+  '@opentelemetry/semantic-conventions@1.30.0': {}
 
   '@opentelemetry/semantic-conventions@1.9.0': {}
 

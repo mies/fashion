@@ -63,6 +63,7 @@ app.get("/openapi.json", (c) => {
 app.use(
   "/fp/*",
   createFiberplane({
+    app,
     openapi: { url: "/openapi.json" },
     apiKey: "fp_wD9nLEXNhaVfq-U-iUzwbOfQAWjTBlDF",
     //fpxEndpoint: "http://localhost:8787/v1/traces",
