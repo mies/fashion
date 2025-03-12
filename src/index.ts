@@ -65,8 +65,7 @@ app.use(
   createFiberplane({
     app,
     openapi: { url: "/openapi.json" },
-    apiKey: "fp_wD9nLEXNhaVfq-U-iUzwbOfQAWjTBlDF",
-    //fpxEndpoint: "http://localhost:8787/v1/traces",
+    apiKey: "fp_JGqvBxo3QRYNwBw8Pl0Nf5xwnVBihEB7",
   }),
 );
 
@@ -348,28 +347,37 @@ app.post("/api/fashion-items/bulk-price-update", async (c) => {
   }
 
   try {
-    // Intentionally faulty SQL that will cause an error
-    // Using incorrect syntax for demonstration
+    // First find the items
     const items = await db
       .select()
       .from(schema.fashionItems)
-      .where(sql`${schema.fashionItems.category} = ${category}`)
-      .set({
-        // This is incorrect - mixing select with set
-        price: sql`${schema.fashionItems.price} * (1 + ${percentageIncrease / 100})`,
-      })
+      .where(eq(schema.fashionItems.category, category))
       .all();
 
-    return c.json({ items });
+    if (items.length === 0) {
+      return c.json({ error: "No items found in this category" }, 404);
+    }
+
+    // Using raw SQL to update prices
+    await db.run(sql`
+      UPDATE fashion_items 
+      SET price = price * ${1 + (percentageIncrease / 100)} 
+      WHERE category = ${category}
+    `);
+    
+    // This code will now run successfully
+    return c.json({ 
+      message: "Prices updated successfully", 
+      updatedCount: items.length 
+    });
   } catch (error) {
     console.error("Database error:", error);
     return c.json(
-      {
-        error: "Failed to update prices",
+      { 
+        error: "Failed to update prices", 
         details: error instanceof Error ? error.message : "Unknown error",
-        technicalDetails: "Attempted to perform an invalid SQL operation",
-      },
-      500,
+      }, 
+      500
     );
   }
 });

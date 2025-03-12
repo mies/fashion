@@ -11,9 +11,28 @@ export const apiSpec = {
   //     description: "Local server"
   //   }
   // ],
+  tags: [
+    {
+      name: "Fashion Items",
+      description: "Operations for managing fashion items"
+    },
+    {
+      name: "Fashion Discovery",
+      description: "Endpoints for discovering and filtering fashion items"
+    },
+    {
+      name: "Inventory Management",
+      description: "Operations for managing inventory and stock status"
+    },
+    {
+      name: "Pricing",
+      description: "Operations related to price management"
+    }
+  ],
   paths: {
     "/api/fashion-items": {
       get: {
+        tags: ["Fashion Items"],
         summary: "List fashion items",
         description: "Retrieve a list of fashion items, optionally filtered by season and category",
         parameters: [
@@ -59,6 +78,7 @@ export const apiSpec = {
         }
       },
       post: {
+        tags: ["Fashion Items"],
         summary: "Create a new fashion item",
         requestBody: {
           required: true,
@@ -106,6 +126,7 @@ export const apiSpec = {
         }
       ],
       get: {
+        tags: ["Fashion Items"],
         summary: "Get a fashion item by ID",
         responses: {
           "200": {
@@ -131,6 +152,7 @@ export const apiSpec = {
         }
       },
       put: {
+        tags: ["Fashion Items"],
         summary: "Update a fashion item",
         requestBody: {
           required: true,
@@ -166,6 +188,7 @@ export const apiSpec = {
         }
       },
       delete: {
+        tags: ["Fashion Items"],
         summary: "Delete a fashion item",
         responses: {
           "200": {
@@ -199,6 +222,7 @@ export const apiSpec = {
     },
     "/api/fashion-items/price-range": {
       get: {
+        tags: ["Fashion Discovery", "Pricing"],
         summary: "Get fashion items within a price range",
         parameters: [
           {
@@ -247,6 +271,7 @@ export const apiSpec = {
     },
     "/api/fashion-items/trending": {
       get: {
+        tags: ["Fashion Discovery"],
         summary: "Get trending fashion items",
         parameters: [
           {
@@ -285,6 +310,7 @@ export const apiSpec = {
     },
     "/api/fashion-items/by-categories": {
       get: {
+        tags: ["Fashion Discovery"],
         summary: "Get fashion items by multiple categories",
         parameters: [
           {
@@ -332,6 +358,7 @@ export const apiSpec = {
     },
     "/api/fashion-items/{id}/stock-status": {
       patch: {
+        tags: ["Inventory Management"],
         summary: "Update stock status of a fashion item",
         parameters: [
           {
@@ -393,10 +420,10 @@ export const apiSpec = {
           }
         }
       }
-
     },
     "/api/fashion-items/bulk-price-update": {
       post: {
+        tags: ["Pricing"],
         summary: "Attempt to update prices for items in a category",
         description: "This endpoint demonstrates error handling and may fail with a 500 error",
         requestBody: {
@@ -468,7 +495,7 @@ export const apiSpec = {
                     },
                     technicalDetails: {
                       type: "string",
-                      example: "Attempted to perform an invalid SQL operation"
+                      example: "SQL syntax error in update operation"
                     }
                   }
                 }
